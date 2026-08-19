@@ -1,0 +1,37 @@
+# 1. Data Sensitif & Kunci Rahasia (Wajib!)
+.env
+.env*.local
+
+# 2. Folder Unduhan Dependensi (Sangat Besar)
+node_modules/
+
+# 3. Hasil Kompilasi Produksi
+dist/
+
+# 4. Folder Konfigurasi Otomatis Editor / AI (Windsurf, Claude, dll)
+.agents/
+.claude/
+.windsurf/
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# 5. Kode Otomatis Buatan Robot Prisma (Prisma 7 Standar)
+src/generated/
+
+# 6. File Log Sampah / Debugging
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+logs/
+*.log
+
+# 7. File Sistem Operasi
+Thumbs.db
+.DS_Store

@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    /* 1. Target & Environment Terbaru (Standar 2026) */
+    "target": "ES2022", // Tetap ES2022 atau ES2023 karena sangat stabil di Node.js modern
+    "module": "commonjs", //Menginstruksikan compiler untuk mengubah seluruh kode modular menjadi format CommonJS (require).
+    "types": ["node"],
+    /* 2. Lokasi Input & Output */
+    "rootDir": "./src", // untuk Compiler masuk ke folder src/ dan mencari semua file .ts.
+    "outDir": "./dist", // membuat folder dist/ untuk menyimpan hasil kompilasi .js
+
+    /* 3. Proteksi Ketat & Konsistensi */
+    "strict": true, // tidak boleh ada variable tanpa deklarasi atau pengecekan tipe
+    "skipLibCheck": true, // skip periksa library node_modules
+    "forceConsistentCasingInFileNames": true, // Konsistensi penggunaan huruf besar dan kecil atau konsistensi nama file.
+    "esModuleInterop": true //agar bisa import export library menjadi sintaks modern
+  },
+  "exclude": ["node_modules", "prisma.config.ts", "dist", "src/generated"] //array path yang tidak ikut di-compile
+}
+
+// [ALUR KERJA COMPILER]
+
+// 1. SCANNING  ──> Merujuk ke "rootDir": "./src". Compiler masuk ke folder src/ dan mencari semua file .ts.
+// 2. CHECKING  ──> Menerapkan "strict": true dan "forceConsistentCasingInFileNames": true.
+//                  Compiler mengecek kesalahan tipe data dan konsistensi nama file.
+// 3. SPEEDUP   ──> Membaca "skipLibCheck": true. Compiler mengabaikan pengecekan kode di node_modules.
+// 4. TRANSLATE ──> Menerjemahkan sintaks modern 'import/export' menjadi 'require/module.exports' ("module": "commonjs")
+//                  dan menggunakan standar fitur JavaScript tahun 2022 ("target": "ES2022").
+// 5. OUTPUT    ──> Membuat folder "./dist" sesuai "outDir", lalu menulis file .js baru di sana.
