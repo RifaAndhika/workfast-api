@@ -11,3 +11,89 @@
   datasource db {
     provider = "postgresql"
   }
+  
+model Client {
+   id         String          @id @default(uuid())
+   name       String 
+   email      String          @unique
+   createdAt  DateTime        @default(now())
+   invoices   Invoice[]
+
+   @@map("clients")
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  EXPIRED
+  CANCELLED
+}
+model Invoice {
+  id            String         @id @default(uuid())
+  clientId      String         @map("client_id")
+  client        Client         @relation(fields: [clientId], references: [id])
+  productName   String         @map("product_name")
+  totalAmount   Decimal        @map("total_amount") @db.Decimal(10, 2) 
+  status        InvoiceStatus  @default(PENDING)
+  dueDate       DateTime       @map("due_date")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  payments      Payment[]
+  revenueEntries RevenueEntry[]
+
+  @@map("invoices")
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+model Payment {
+  id                    String        @id @default(uuid())
+  invoiceId             String        @map("invoice_id")
+  invoice               Invoice       @relation(fields: [invoiceId], references: [id])
+  idempotencyKey        String        @unique @map("idempotency_key")
+  gatewayTransactionId String        @map("gateway_transaction_id")
+  status                PaymentStatus @default(PENDING) 
+  paidAt                DateTime      @default(now()) @map("paid_at")
+
+  @@map("payments")
+}
+
+model RevenueEntry{
+  id                    String    @id @default(uuid())
+  invoiceId             String    @map("invoice_id")
+  invoice               Invoice   @relation(fields: [invoiceId], references: [id])
+  amount                Decimal   @db.Decimal(10, 2) 
+  recordedAt            DateTime  @default(now())
+
+  @@map("revenue_entries")
+}
+
+
+model MonthlyReport {
+  id                 String   @id @default(uuid())
+  month              Int      // Diubah ke Int (1 - 12) 
+  year               Int      // Diubah ke Int (Contoh: 2026) 
+  totalRevenueCached Decimal  @map("total_revenue_cached") @db.Decimal(10, 2)
+  generatedAt        DateTime @default(now()) @map("generated_at")
+
+  // Constraint Unik: Mencegah duplikat laporan untuk kombinasi bulan & tahun yang sama
+  @@unique([month, year]) 
+  @@map("monthly_reports")
+}
+
+enum Role {
+  ProjectManager
+  Finance
+  Owner
+}
+model User {
+  id                    String    @id @default(uuid())
+  name                  String 
+  email                 String    @unique
+  passwordHash          String 
+  role                  Role      @default(Finance)
+  createdAt             DateTime  @default(now())
+  @@map("users")
+}
