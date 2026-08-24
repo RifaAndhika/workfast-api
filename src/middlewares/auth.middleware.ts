@@ -12,7 +12,7 @@ export function authMiddleware(
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const parts = authorizationHeader.split(" ");
+  const parts = authorizationHeader.split(" "); // mengubah string menjadi array dan menjadi 2 index
   // 2. Perbaikan logika: Error jika BUKAN Bearer atau format salah
   if (parts.length !== 2 || parts[0] !== "Bearer") {
     return res

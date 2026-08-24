@@ -14,7 +14,14 @@
     "forceConsistentCasingInFileNames": true, // Konsistensi penggunaan huruf besar dan kecil atau konsistensi nama file.
     "esModuleInterop": true //agar bisa import export library menjadi sintaks modern
   },
-  "exclude": ["node_modules", "prisma.config.ts", "dist", "src/generated"] //array path yang tidak ikut di-compile
+
+  "exclude": [
+    "node_modules",
+    "prisma.config.ts",
+    "dist",
+    "src/generated",
+    "prisma/seed.ts"
+  ] //array path yang tidak ikut di-compile
 }
 
 // [ALUR KERJA COMPILER]
