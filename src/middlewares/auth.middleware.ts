@@ -27,7 +27,7 @@ export function authMiddleware(
     return res.status(401).json({ message: "Token is missing" });
   }
 
-  const decoded = verifyToken(token);
+  const decoded = verifyToken(token); // memanggil fungsi verifyToken dan mengembalikan nilai decoded yang sudah diverify
   // TAMBAHKAN PENGECEKAN INI:
   if (!decoded) {
     return res.status(401).json({ message: "Invalid or expired token" });
