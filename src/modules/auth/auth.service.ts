@@ -14,7 +14,7 @@ export const loginService = async (email: string, password: string) => {
     throw new AppError("Email or password is incorrect", 401);
   }
 
-  const token = await generateToken({
+  const token = generateToken({
     userId: user.id,
     email: user.email,
     role: user.role,

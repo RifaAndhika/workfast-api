@@ -5,4 +5,4 @@ const router = Router();
 
 router.post("/login", loginController);
 
-export default router; // Pastikan di-export agar bisa dipakai di server.ts/app.ts
+export const authRoute = router;

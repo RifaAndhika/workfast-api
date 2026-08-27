@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { loginService } from "./auth.service";
 import { AppError } from "../../utils/app-error";
 import { schemaAuth } from "./auth.schema";
+import { sendResponse } from "../../utils/sendResponse";
 
 export const loginController = async function (req: Request, res: Response) {
   const payload = schemaAuth.safeParse(req.body);
@@ -13,11 +14,12 @@ export const loginController = async function (req: Request, res: Response) {
       payload.data.email,
       payload.data.password,
     );
-    return res.status(200).json({ success: true, token: accessToken });
+    return sendResponse(res, 200, "Login success", { accessToken });
   } catch (error) {
+    console.error(error);
     if (error instanceof AppError) {
-      return res.status(error.statusCode).json({ message: error.message });
+      return sendResponse(res, error.statusCode, error.message);
     }
-    return res.status(500).json({ message: "Internal Server Error" });
+    return sendResponse(res, 500, "Internal server error");
   }
 };
