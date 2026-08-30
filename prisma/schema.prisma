@@ -53,7 +53,7 @@ model Payment {
   invoiceId             String        @map("invoice_id")
   invoice               Invoice       @relation(fields: [invoiceId], references: [id])
   idempotencyKey        String        @unique @map("idempotency_key")
-  gatewayTransactionId String        @map("gateway_transaction_id")
+  gatewayTransactionId  String        @map("gateway_transaction_id")
   status                PaymentStatus @default(PENDING) 
   paidAt                DateTime      @default(now()) @map("paid_at")
 

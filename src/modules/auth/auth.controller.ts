@@ -17,9 +17,6 @@ export const loginController = async function (req: Request, res: Response) {
     return sendResponse(res, 200, "Login success", { accessToken });
   } catch (error) {
     console.error(error);
-    if (error instanceof AppError) {
-      return sendResponse(res, error.statusCode, error.message);
-    }
     return sendResponse(res, 500, "Internal server error");
   }
 };
