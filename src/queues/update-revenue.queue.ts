@@ -4,8 +4,11 @@ import { connection } from "../lib/redis";
 export interface UpdateRevenuePayload {
   invoiceId: string;
   gatewayTransactionId: string;
-  amount: number;
+  paidAmount: number;
 }
-export const invoiceQueue = new Queue<UpdateRevenuePayload>("update-revenue", {
-  connection,
-});
+export const updateRevenueQueue = new Queue<UpdateRevenuePayload>(
+  "update-revenue",
+  {
+    connection,
+  },
+);
