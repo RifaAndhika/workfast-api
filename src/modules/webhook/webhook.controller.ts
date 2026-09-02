@@ -12,7 +12,7 @@ export const webhookController = async (req: Request, res: Response) => {
     }
 
     await processInvoiceWebhook(req.body);
-
+    console.log("Webhook processed and queued successfully");
     return sendResponse(res, 200, "Webhook processed and queued successfully");
   } catch (error) {
     console.error(error);
