@@ -41,7 +41,7 @@ export async function processInvoiceWebhook(payload: XenditInvoicePayload) {
     return;
   }
 
-  await updateRevenueQueue.add("update_revnue", {
+  await updateRevenueQueue.add("update_revenue", {
     invoiceId: payload.data.external_id,
     gatewayTransactionId: payload.data.id,
     paidAmount: payload.data.paid_amount,
