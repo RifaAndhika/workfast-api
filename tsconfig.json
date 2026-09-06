@@ -20,7 +20,8 @@
     "prisma.config.ts",
     "dist",
     "src/generated",
-    "prisma/seed.ts"
+    "prisma/seed.ts",
+    "prisma/seed-test-data.ts"
   ] //array path yang tidak ikut di-compile
 }
 

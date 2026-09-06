@@ -1,6 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/app-error";
-
+import { Prisma } from "../../generated/prisma/client";
 export const updateRevenueProcessor = async (
   invoiceId: string,
   gatewayTransactionId: string,
@@ -30,7 +30,7 @@ export const updateRevenueProcessor = async (
       prisma.revenueEntry.create({
         data: {
           invoiceId,
-          amount: paidAmount, // Menggunakan Prisma.Decimal demi presisi keuangan
+          amount: paidAmount,
         },
       }),
       prisma.invoice.update({
@@ -40,6 +40,16 @@ export const updateRevenueProcessor = async (
     ]);
     return { newPayment, newRevenue, updatedInvoice };
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      console.log(
+        `[Idempotency-Trigger] Race condition prevented. Transaction ${gatewayTransactionId} already processed.`,
+      );
+      return;
+    }
+
     console.error(
       `Error occurred while updating revenue for invoiceId ${invoiceId}:`,
       error,
