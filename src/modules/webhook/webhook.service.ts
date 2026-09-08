@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import dotenv from "dotenv";
 import { updateRevenueQueue } from "../../queues/update-revenue.queue";
+import { schemaWebhook } from "./webhook.schema";
+import { z } from "zod";
 
 dotenv.config();
 
@@ -24,17 +26,14 @@ export function verifyXenditToken(receivedToken: string): boolean {
   return crypto.timingSafeEqual(receivedBuffer, expectedBuffer);
 }
 
-export interface XenditInvoicePayload {
-  event: string;
-  data: {
-    id: string;
-    external_id: string;
-    status: string;
-    paid_amount: number;
-  };
-}
+export type XenditInvoicePayload = z.infer<typeof schemaWebhook>;
 
 export async function processInvoiceWebhook(payload: XenditInvoicePayload) {
+  // 1. Cek tipe event-nya dulu. Jika bukan "invoice.paid", langsung hentikan proses.
+  if (payload.event !== "invoice.paid") {
+    console.log(`Event ${payload.event} diabaikan.`);
+    return;
+  }
   const invoiceStatus = payload.data.status;
 
   if (invoiceStatus !== "PAID") {

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { verifyXenditToken } from "./webhook.service";
 import { sendResponse } from "../../utils/sendResponse";
 import { processInvoiceWebhook } from "./webhook.service";
+import { schemaWebhook } from "./webhook.schema";
 
 export const webhookController = async (req: Request, res: Response) => {
   try {
@@ -10,8 +11,11 @@ export const webhookController = async (req: Request, res: Response) => {
     if (!Isvalid) {
       return sendResponse(res, 401, "Unauthorized");
     }
-
-    await processInvoiceWebhook(req.body);
+    const payload = schemaWebhook.safeParse(req.body);
+    if (!payload.success) {
+      return sendResponse(res, 400, "Invalid payload");
+    }
+    await processInvoiceWebhook(payload.data);
     console.log("Webhook processed and queued successfully");
     return sendResponse(res, 200, "Webhook processed and queued successfully");
   } catch (error) {
