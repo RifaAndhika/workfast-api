@@ -37,9 +37,12 @@ export async function processInvoiceWebhook(payload: XenditInvoicePayload) {
   const invoiceStatus = payload.data.status;
 
   if (invoiceStatus !== "PAID") {
+    console.log(`Invoice status ${invoiceStatus} diabaikan.`);
     return;
   }
-
+  console.log(
+    `Memproses webhook untuk invoiceId: ${payload.data.external_id}, gatewayTransactionId: ${payload.data.id}, paidAmount: ${payload.data.paid_amount}`,
+  );
   await updateRevenueQueue.add("update_revenue", {
     invoiceId: payload.data.external_id,
     gatewayTransactionId: payload.data.id,
