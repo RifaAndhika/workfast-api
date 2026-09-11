@@ -1,6 +1,6 @@
 import { connection } from "../../lib/redis";
 import { Worker } from "bullmq";
-import type { UpdateRevenuePayload } from "../../queues/update-revenue.queue";
+import type { UpdateRevenuePayload } from "../../queues/queue-update-revenue";
 import { updateRevenueProcessor } from "./update-revenue.processor";
 
 export const updateRevenueWorker = new Worker<UpdateRevenuePayload>(

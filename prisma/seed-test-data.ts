@@ -8,7 +8,7 @@ async function main() {
     update: {},
     create: {
       name: "Client Utama",
-      email: "client@gmail.com",
+      email: "rifaandhika9@gmail.com",
     },
   });
   console.log({ client });
@@ -34,3 +34,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+//npx tsx buat jalanin seeder
