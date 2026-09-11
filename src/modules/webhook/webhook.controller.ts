@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { verifyXenditToken } from "./webhook.service";
 import { sendResponse } from "../../utils/sendResponse";
 import { processInvoiceWebhook } from "./webhook.service";
-import { schemaWebhook } from "./webhook.schema";
+import { schemaXenditPayload } from "./webhook.schema";
 
 export const webhookController = async (req: Request, res: Response) => {
   try {
@@ -11,7 +11,7 @@ export const webhookController = async (req: Request, res: Response) => {
     if (!Isvalid) {
       return sendResponse(res, 401, "Unauthorized");
     }
-    const payload = schemaWebhook.safeParse(req.body);
+    const payload = schemaXenditPayload.safeParse(req.body);
     if (!payload.success) {
       return sendResponse(res, 400, "Invalid payload");
     }
