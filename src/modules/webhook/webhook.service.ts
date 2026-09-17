@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import { updateRevenueQueue } from "../../queues/queue-update-revenue";
 import { schemaXenditPayload } from "./webhook.schema";
 import { z } from "zod";
-import { sendReceiptQueue } from "../../queues/queue-send-receipt";
 
 dotenv.config();
 
@@ -47,11 +46,6 @@ export async function processInvoiceWebhook(payload: XenditInvoicePayload) {
   await updateRevenueQueue.add("update_revenue", {
     invoiceId: payload.data.external_id,
     gatewayTransactionId: payload.data.id,
-    paidAmount: payload.data.paid_amount,
-  });
-
-  await sendReceiptQueue.add("send-receipt", {
-    invoiceId: payload.data.external_id,
     paidAmount: payload.data.paid_amount,
   });
 }

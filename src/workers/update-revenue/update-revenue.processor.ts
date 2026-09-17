@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/app-error";
 import { Prisma } from "../../generated/prisma/client";
+import { sendReceiptQueue } from "../../queues/queue-send-receipt";
 export const updateRevenueProcessor = async (
   invoiceId: string,
   gatewayTransactionId: string,
@@ -38,6 +39,15 @@ export const updateRevenueProcessor = async (
         data: { status: "PAID" },
       }),
     ]);
+
+    await sendReceiptQueue.add("send-receipt", {
+      invoiceId,
+      paidAmount,
+    });
+    console.log(
+      `Revenue updated successfully for invoiceId ${invoiceId}. Payment ID: ${newPayment.id}, Revenue Entry ID: ${newRevenue.id}`,
+    );
+
     return { newPayment, newRevenue, updatedInvoice };
   } catch (error) {
     if (
