@@ -27,7 +27,7 @@ export const sendReceiptProcessor = async (
       html: `<p>Thank you for your payment of $${paidAmount} for invoice ${invoiceId} , product name ${invoice?.productName},
      total amount ${invoice?.totalAmount}, 
      payment status ${invoice?.status}
-      from ${invoice?.client?.name} $(${invoice?.client?.email}).</p>`,
+      from ${invoice?.client?.name} ${invoice?.client?.email}).</p>`,
     });
     console.log("Email sent successfully:", emailResponse);
     return emailResponse;
