@@ -4,6 +4,7 @@ import { updateRevenueQueue } from "../../queues/queue-update-revenue";
 import { schemaXenditPayload } from "./webhook.schema";
 import { z } from "zod";
 import { sendReceiptQueue } from "../../queues/queue-send-receipt";
+import { notifySlackQueue } from "../../queues/queue-notify-slack";
 
 dotenv.config();
 
@@ -51,6 +52,11 @@ export async function processInvoiceWebhook(payload: XenditInvoicePayload) {
   });
 
   await sendReceiptQueue.add("send-receipt", {
+    invoiceId: payload.data.external_id,
+    paidAmount: payload.data.paid_amount,
+  });
+
+  await notifySlackQueue.add("notify-slack", {
     invoiceId: payload.data.external_id,
     paidAmount: payload.data.paid_amount,
   });
