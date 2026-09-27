@@ -5,9 +5,21 @@ dotenv.config();
 
 export const notifySlackProcessor = async (
   invoiceId: string,
+  gatewayTransactionId: string,
   paidAmount: number,
 ) => {
   try {
+    const exsistingGatewayTransactionId = await prisma.payment.findUnique({
+      where: { idempotencyKey: gatewayTransactionId },
+      select: { gatewayTransactionId: true },
+    });
+
+    if (exsistingGatewayTransactionId) {
+      console.log(
+        `Payment with gatewayTransactionId ${gatewayTransactionId} has already been processed. Skipping update.`,
+      );
+      return;
+    }
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
       include: { client: true },
