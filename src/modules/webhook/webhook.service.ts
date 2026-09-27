@@ -2,6 +2,7 @@ import crypto from "crypto";
 import dotenv from "dotenv";
 import { updateRevenueQueue } from "../../queues/queue-update-revenue";
 import { schemaXenditPayload } from "./webhook.schema";
+import { prisma } from "../../lib/prisma";
 import { z } from "zod";
 import { sendReceiptQueue } from "../../queues/queue-send-receipt";
 import { notifySlackQueue } from "../../queues/queue-notify-slack";

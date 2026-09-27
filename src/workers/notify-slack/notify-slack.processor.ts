@@ -18,14 +18,6 @@ export const notifySlackProcessor = async (
       throw new Error(`Invoice with ID ${invoiceId} not found`);
     }
 
-    if (invoice.status !== "PAID") {
-      console.error(
-        `Invoice with ID ${invoiceId} is not marked as PAID. Current status: ${invoice.status}`,
-      );
-      throw new Error(
-        `Invoice with ID ${invoiceId} is not marked as PAID. Current status: ${invoice.status}`,
-      );
-    }
     const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
     if (!slackWebhookUrl) {
       console.error(
@@ -57,6 +49,11 @@ export const notifySlackProcessor = async (
             {
               title: "Total Tagihan",
               value: `Rp ${Number(invoice.totalAmount).toLocaleString("id-ID")}`,
+              short: true,
+            },
+            {
+              title: "Status Pembayaran",
+              value: `${invoice.status}`,
               short: true,
             },
           ],
