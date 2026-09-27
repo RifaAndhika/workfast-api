@@ -54,13 +54,13 @@ export async function processInvoiceWebhook(payload: XenditInvoicePayload) {
 
   await sendReceiptQueue.add("send-receipt", {
     invoiceId: payload.data.external_id,
-    gatewayTransactionId: payload.data.id,
+
     paidAmount: payload.data.paid_amount,
   });
 
   await notifySlackQueue.add("notify-slack", {
     invoiceId: payload.data.external_id,
-    gatewayTransactionId: payload.data.id,
+
     paidAmount: payload.data.paid_amount,
   });
 }

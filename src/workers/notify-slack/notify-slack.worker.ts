@@ -7,11 +7,7 @@ export const notifySlackWorker = new Worker<NotifySlackPayload>(
   "notify-slack", // Harus sama persis dengan nama di Queue file
   async (job) => {
     console.log("🔥 Worker notify-slack menerima data:", job.data);
-    return notifySlackProcessor(
-      job.data.invoiceId,
-      job.data.gatewayTransactionId,
-      job.data.paidAmount,
-    );
+    return notifySlackProcessor(job.data.invoiceId, job.data.paidAmount);
   },
   {
     connection,

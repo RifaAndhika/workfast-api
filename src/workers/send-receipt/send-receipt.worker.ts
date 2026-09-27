@@ -9,7 +9,7 @@ export const sendReceiptWorker = new Worker<SendReceiptPayload>(
     console.log(job.data);
     return sendReceiptProcessor(
       job.data.invoiceId,
-      job.data.gatewayTransactionId,
+
       job.data.paidAmount,
     );
   },
