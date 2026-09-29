@@ -1,4 +1,3 @@
-import { connection } from "../../lib/redis";
 import { resend } from "../../lib/resend";
 import { prisma } from "../../lib/prisma";
 
