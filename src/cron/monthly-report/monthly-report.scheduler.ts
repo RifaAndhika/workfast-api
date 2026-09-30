@@ -51,18 +51,30 @@ export const generateMonthlyRevenueReport = async () => {
     const totalRevenue = revenueAggregation._sum.amount || 0;
     console.log(`💰 Total Revenue: ${totalRevenue}`);
 
-    //untuk nanti bakal ngirimin parameter month,year dan totalRevenueCached untuk mengisi database monthly_reports
-    return {
-      totalRevenue,
-      period: {
+    const MonthlyReport = await prisma.monthlyReport.upsert({
+      where: {
+        // Pastikan di schema.prisma Anda memiliki: @@unique([month, year])
+        // Jika nama index compound-nya otomatis, tulisannya seperti di bawah ini:
+        month_year: {
+          month: startDate.getMonth() + 1, // Menggunakan 1-12 agar konsisten dengan filter data
+          year: startDate.getFullYear(),
+        },
+      },
+      update: {
+        totalRevenueCached: totalRevenue,
+        generatedAt: new Date(),
+      },
+      create: {
         month: startDate.getMonth() + 1,
         year: startDate.getFullYear(),
+        totalRevenueCached: totalRevenue,
+        generatedAt: new Date(),
       },
-    };
+    });
+
+    return MonthlyReport;
   } catch (error) {
     console.error("Error generating monthly report:", error);
     throw new Error("Failed to generate monthly report");
   }
 };
-
-generateMonthlyRevenueReport();
