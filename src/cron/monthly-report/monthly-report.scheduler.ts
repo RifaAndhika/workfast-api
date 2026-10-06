@@ -51,7 +51,7 @@ export const generateMonthlyRevenueReport = async () => {
     const totalRevenue = revenueAggregation._sum.amount || 0;
     console.log(`💰 Total Revenue: ${totalRevenue}`);
 
-    const MonthlyReport = await prisma.monthlyReport.upsert({
+    const monthlyReport = await prisma.monthlyReport.upsert({
       where: {
         // Pastikan di schema.prisma Anda memiliki: @@unique([month, year])
         // Jika nama index compound-nya otomatis, tulisannya seperti di bawah ini:
@@ -72,7 +72,7 @@ export const generateMonthlyRevenueReport = async () => {
       },
     });
 
-    return MonthlyReport;
+    return monthlyReport;
   } catch (error) {
     console.error("Error generating monthly report:", error);
     throw new Error("Failed to generate monthly report");
