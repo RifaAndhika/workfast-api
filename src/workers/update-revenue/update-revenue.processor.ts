@@ -6,6 +6,20 @@ export const updateRevenueProcessor = async (
   gatewayTransactionId: string,
   paidAmount: number,
 ) => {
+  // 💡 Cari invoice berdasarkan ID dari Xendit, SEKALIGUS tarik data Client-nya
+  const invoice = await prisma.invoice.findUnique({
+    where: { id: invoiceId },
+    include: {
+      client: true, // 👈 Relasi sakti Prisma: Menarik data client secara otomatis
+    },
+  });
+  if (!invoice) {
+    throw new Error(`Invoice dengan ID ${invoiceId} tidak ditemukan.`);
+  }
+  console.log(`Pembayaran sukses diterima dari Client: ${invoice.client.name}`);
+  console.log(`Email Client: ${invoice.client.email}`);
+  console.log(`Nama Produk: ${invoice.productName}`);
+
   const exsistingGatewayTransactionId = await prisma.payment.findUnique({
     where: { idempotencyKey: gatewayTransactionId },
     select: { gatewayTransactionId: true },
