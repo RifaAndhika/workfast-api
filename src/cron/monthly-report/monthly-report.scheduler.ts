@@ -11,8 +11,9 @@ export const generateMonthlyRevenueReport = async (customDate?: Date) => {
   // tentukan target bulan lalu yang mau digenerate report-nya. Misal sekarang tanggal 3 october (bulan  indeks 9), maka target bulan lalu adalah september (bulan indeks 8)
   const targetMonthIndex = currentUTCMonth - 1;
 
+  // tanggal pertama bulan lalu
   const startDate = new Date(
-    Date.UTC(currentUTCFullYear, targetMonthIndex, 1, 0, 0, 0),
+    Date.UTC(currentUTCFullYear, targetMonthIndex, 1, 0, 0, 0, 0),
   );
   const firstDayOfCurrentMonth = Date.UTC(
     currentUTCFullYear,
