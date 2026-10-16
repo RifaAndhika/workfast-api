@@ -1,63 +1,61 @@
 import { prisma } from "../../lib/prisma";
+import cron from "node-cron";
 
-export const generateMonthlyRevenueReport = async () => {
-  // 1. Tentukan tanggal hari ini (misal running di 1 Oktober)
-  const today = new Date();
+export const generateMonthlyRevenueReport = async (customDate?: Date) => {
+  const today = customDate || new Date();
 
-  // 2. Cari batas akhir bulan lalu (Tanggal 0 jam 23:59:59)
-  const endDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    0,
-    23,
-    59,
-    59,
-    999,
-  );
+  //ambil tahun dan bulan saat ini dalam format UTC agar terhindar dari bug zona waktu server (UTC vs WIB)
+  const currentUTCFullYear = today.getUTCFullYear();
+  const currentUTCMonth = today.getUTCMonth();
 
-  // 3. Cari batas awal bulan lalu (Tanggal 1 jam 00:00:00 di bulan yang sama dengan endDate)
+  // tentukan target bulan lalu yang mau digenerate report-nya. Misal sekarang tanggal 3 october (bulan  indeks 9), maka target bulan lalu adalah september (bulan indeks 8)
+  const targetMonthIndex = currentUTCMonth - 1;
+
   const startDate = new Date(
-    endDate.getFullYear(),
-    endDate.getMonth(),
+    Date.UTC(currentUTCFullYear, targetMonthIndex, 1, 0, 0, 0),
+  );
+  const firstDayOfCurrentMonth = Date.UTC(
+    currentUTCFullYear,
+    currentUTCMonth,
     1,
     0,
     0,
     0,
     0,
   );
+  // tanggal terakhir bulan lalu adalah satu milidetik sebelum tanggal pertama bulan ini
+  const endDate = new Date(firstDayOfCurrentMonth - 1); // tanggal terakhir bulan lalu
 
   console.log(
-    `🔎 Menarik data transaksi dari: ${startDate.toISOString()} sampai ${endDate.toISOString()}`,
+    `Generating monthly revenue report for ${startDate.toISOString()} to ${endDate.toISOString()}`,
   );
-  console.log(
-    `📅 Bulan: ${startDate.toLocaleString("default", { month: "long" })}`,
-  );
-  console.log(`📅 Tahun: ${startDate.getFullYear()}`);
 
-  // 4. Jalankan Query SUM dengan Prisma Aggregate
   try {
-    const revenueAggregation = await prisma.revenueEntry.aggregate({
+    const revenueAgregation = await prisma.revenueEntry.aggregate({
       _sum: {
-        amount: true, // sesuaikan dengan nama kolom nominal uang Anda
+        amount: true,
       },
       where: {
         recordedAt: {
-          gte: startDate, // Mulai dari tanggal 1 jam 00:00:00
-          lte: endDate, // Sampai tanggal 30/31 jam 23:59:59
+          gte: startDate,
+          lte: endDate,
         },
       },
     });
 
-    const totalRevenue = revenueAggregation._sum.amount || 0;
-    console.log(`💰 Total Revenue: ${totalRevenue}`);
+    const totalRevenue = revenueAgregation._sum.amount
+      ? Number(revenueAgregation._sum.amount)
+      : 0;
+    console.log(
+      `Total revenue for ${startDate.toISOString()} to ${endDate.toISOString()}: ${totalRevenue}`,
+    );
 
+    // 5. Simpan ke database Supabase menggunakan Upsert
     const monthlyReport = await prisma.monthlyReport.upsert({
       where: {
-        // Pastikan di schema.prisma Anda memiliki: @@unique([month, year])
-        // Jika nama index compound-nya otomatis, tulisannya seperti di bawah ini:
         month_year: {
-          month: startDate.getMonth() + 1, // Menggunakan 1-12 agar konsisten dengan filter data
-          year: startDate.getFullYear(),
+          month: targetMonthIndex + 1,
+          year: currentUTCFullYear,
         },
       },
       update: {
@@ -65,16 +63,34 @@ export const generateMonthlyRevenueReport = async () => {
         generatedAt: new Date(),
       },
       create: {
-        month: startDate.getMonth() + 1,
-        year: startDate.getFullYear(),
+        month: targetMonthIndex + 1,
+        year: currentUTCFullYear,
         totalRevenueCached: totalRevenue,
         generatedAt: new Date(),
       },
     });
-
     return monthlyReport;
   } catch (error) {
-    console.error("Error generating monthly report:", error);
-    throw new Error("Failed to generate monthly report");
+    console.error("Error generating monthly revenue report:", error);
+    throw error;
   }
 };
+
+// --- PINDAHKAN CRON SCHEDULE KE LUAR FUNGSI DI SINI ---
+// Berjalan otomatis setiap tanggal 1 jam 00:05 UTC
+cron.schedule(
+  "5 0 1 * *",
+  async () => {
+    console.log("Running scheduled monthly revenue report CRON job...");
+    try {
+      await generateMonthlyRevenueReport();
+    } catch (err) {
+      console.error("CRON Job failed:", err);
+    }
+  },
+  {
+    timezone: "UTC", // Memastikan berjalan berbasis waktu UTC sesuai logika codingan Anda
+  },
+);
+
+generateMonthlyRevenueReport(); // Panggil fungsi ini saat server dijalankan untuk memastikan data bulan lalu sudah ada di database
