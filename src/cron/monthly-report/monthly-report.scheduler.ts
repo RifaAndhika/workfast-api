@@ -1,5 +1,4 @@
 import { prisma } from "../../lib/prisma";
-import cron from "node-cron";
 
 export const generateMonthlyRevenueReport = async (customDate?: Date) => {
   const today = customDate || new Date();
@@ -76,22 +75,5 @@ export const generateMonthlyRevenueReport = async (customDate?: Date) => {
     throw error;
   }
 };
-
-// --- PINDAHKAN CRON SCHEDULE KE LUAR FUNGSI DI SINI ---
-// Berjalan otomatis setiap tanggal 1 jam 00:05 UTC
-cron.schedule(
-  "5 0 1 * *",
-  async () => {
-    console.log("Running scheduled monthly revenue report CRON job...");
-    try {
-      await generateMonthlyRevenueReport();
-    } catch (err) {
-      console.error("CRON Job failed:", err);
-    }
-  },
-  {
-    timezone: "UTC", // Memastikan berjalan berbasis waktu UTC sesuai logika codingan Anda
-  },
-);
 
 generateMonthlyRevenueReport(); // Panggil fungsi ini saat server dijalankan untuk memastikan data bulan lalu sudah ada di database
