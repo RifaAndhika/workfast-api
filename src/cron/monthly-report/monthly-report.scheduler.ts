@@ -50,12 +50,15 @@ export const generateMonthlyRevenueReport = async (customDate?: Date) => {
       `Total revenue for ${startDate.toISOString()} to ${endDate.toISOString()}: ${totalRevenue}`,
     );
 
+    const reportMonth = startDate.getUTCMonth() + 1; // bulan dalam format 1-12
+    const reportYear = startDate.getUTCFullYear();
+
     // 5. Simpan ke database Supabase menggunakan Upsert
     const monthlyReport = await prisma.monthlyReport.upsert({
       where: {
         month_year: {
-          month: targetMonthIndex + 1,
-          year: currentUTCFullYear,
+          month: reportMonth,
+          year: reportYear,
         },
       },
       update: {
@@ -63,8 +66,8 @@ export const generateMonthlyRevenueReport = async (customDate?: Date) => {
         generatedAt: new Date(),
       },
       create: {
-        month: targetMonthIndex + 1,
-        year: currentUTCFullYear,
+        month: reportMonth,
+        year: reportYear,
         totalRevenueCached: totalRevenue,
         generatedAt: new Date(),
       },
