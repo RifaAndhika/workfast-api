@@ -5,11 +5,13 @@ export interface UpdateRevenuePayload {
   invoiceId: string;
   gatewayTransactionId: string;
   paidAmount: number;
+  clientEmail: string;
 }
 export const updateRevenueQueue = new Queue<UpdateRevenuePayload>(
   "update-revenue",
   {
     connection,
+
     defaultJobOptions: {
       //max retry
       attempts: 3,

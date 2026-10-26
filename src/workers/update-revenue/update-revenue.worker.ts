@@ -2,11 +2,13 @@ import { connection } from "../../lib/redis";
 import { Worker, Queue } from "bullmq";
 import type { UpdateRevenuePayload } from "../../queues/queue-update-revenue";
 import { updateRevenueProcessor } from "./update-revenue.processor";
+import { resend } from "../../lib/resend";
 
 export const updateRevenueWorker = new Worker<UpdateRevenuePayload>(
   "update-revenue",
   async (job) => {
     console.log(job.data);
+
     return updateRevenueProcessor(
       job.data.invoiceId,
       job.data.gatewayTransactionId,
@@ -17,6 +19,39 @@ export const updateRevenueWorker = new Worker<UpdateRevenuePayload>(
     connection,
   },
 );
+
+const sendSlackFailureAlertToClient = async (
+  invoiceId: string,
+  clientEmail: string,
+) => {
+  const targetEmail =
+    process.env.NODE_ENV === "production"
+      ? clientEmail
+      : "rifaandhika9@gmail.com";
+
+  try {
+    await resend.emails.send({
+      from: "Workfast Support <onboarding@resend.dev>", // Ganti dengan domain terverifikasi Anda
+      to: targetEmail,
+      subject: `Pembaruan Pembayaran Invoice #${invoiceId}`,
+      html: `
+        <p>Halo,</p>
+        <p>Kami mengonfirmasi bahwa pembayaran Anda untuk Invoice <strong>#${invoiceId}</strong> telah berhasil kami terima.</p>
+        <p>Namun, saat ini server kami sedang mengalami antrean pemrosesan yang padat untuk mengaktifkan layanan Anda. Tim teknis kami sedang menangani hal ini secara instan.</p>
+        <p>Anda tidak perlu melakukan pembayaran ulang. Layanan Anda akan aktif otomatis dalam beberapa menit ke depan.</p>
+        <p>Terima kasih atas kesabaran Anda,<br>Team Workfast</p>
+      `,
+    });
+    console.log(
+      `✉️ Email fallback penundaan berhasil dikirim ke ${targetEmail}`,
+    );
+  } catch (error) {
+    console.error(
+      "❌ Gagal mengirim email fallback ke client melalui Resend:",
+      error,
+    );
+  }
+};
 
 const sendSlackFailureAlert = async (
   jobId: string,
@@ -91,6 +126,11 @@ updateRevenueWorker.on("failed", async (job, err) => {
       job?.id || "UNKNOWN",
       err.message,
       job?.data || {},
+    );
+
+    await sendSlackFailureAlertToClient(
+      job?.data?.invoiceId || "UNKNOWN",
+      job?.data?.clientEmail || "UNKNOWN",
     );
   }
 });

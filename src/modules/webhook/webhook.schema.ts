@@ -7,5 +7,6 @@ export const schemaXenditPayload = z.object({
     external_id: z.string(),
     status: z.string(),
     paid_amount: z.number(),
+    client_email: z.email(),
   }),
 });

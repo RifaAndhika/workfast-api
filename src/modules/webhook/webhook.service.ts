@@ -32,6 +32,12 @@ export type XenditInvoicePayload = z.infer<typeof schemaXenditPayload>;
 
 export async function processInvoiceWebhook(payload: XenditInvoicePayload) {
   // 1. Cek tipe event-nya dulu. Jika bukan "invoice.paid", langsung hentikan proses.
+  if (payload.data.paid_amount <= 0) {
+    console.log(
+      "Payload tidak memiliki paid_amount atau client_email. Diabaikan.",
+    );
+    return;
+  }
   if (payload.event !== "invoice.paid") {
     console.log(`Event ${payload.event} diabaikan.`);
     return;
@@ -49,6 +55,7 @@ export async function processInvoiceWebhook(payload: XenditInvoicePayload) {
     invoiceId: payload.data.external_id,
     gatewayTransactionId: payload.data.id,
     paidAmount: payload.data.paid_amount,
+    clientEmail: payload.data.client_email,
   });
 
   await sendReceiptQueue.add("send-receipt", {
