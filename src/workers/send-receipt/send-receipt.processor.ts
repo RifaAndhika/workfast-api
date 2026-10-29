@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma";
 
 export const sendReceiptProcessor = async (
   invoiceId: string,
-
+  gatewayTransactionId: string,
   paidAmount: number,
 ) => {
   try {
@@ -13,6 +13,16 @@ export const sendReceiptProcessor = async (
     });
     if (!invoice) {
       throw new Error(`Invoice with ID ${invoiceId} not found`);
+    }
+
+    const existingPayment = await prisma.payment.findUnique({
+      where: { idempotencyKey: gatewayTransactionId },
+    });
+    if (existingPayment) {
+      console.log(
+        `Payment with gatewayTransactionId ${gatewayTransactionId} has already been processed. Skipping update.`,
+      );
+      return;
     }
 
     const recipientEmail =

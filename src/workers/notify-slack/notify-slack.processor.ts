@@ -5,6 +5,7 @@ dotenv.config();
 
 export const notifySlackProcessor = async (
   invoiceId: string,
+  gatewayTransactionId: string,
   paidAmount: number,
 ) => {
   try {
@@ -16,6 +17,15 @@ export const notifySlackProcessor = async (
     if (!invoice) {
       console.error(`Invoice with ID ${invoiceId} not found`);
       throw new Error(`Invoice with ID ${invoiceId} not found`);
+    }
+    const existingPayment = await prisma.payment.findUnique({
+      where: { idempotencyKey: gatewayTransactionId },
+    });
+    if (existingPayment) {
+      console.log(
+        `Payment with gatewayTransactionId ${gatewayTransactionId} has already been processed. Skipping Slack notification.`,
+      );
+      return;
     }
 
     const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;

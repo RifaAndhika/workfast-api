@@ -3,6 +3,7 @@ import { connection } from "../lib/redis";
 
 export interface SendReceiptPayload {
   invoiceId: string;
+  gatewayTransactionId: string;
   paidAmount: number;
 }
 
